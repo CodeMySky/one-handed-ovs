@@ -15,16 +15,18 @@ public:
 signals:
     void bridgeConfirmed(QString);
     void portConfirmed(int, QString);
+    void interfaceConfirmed(int, int, QString);
 public slots:
     //void showBridge();
 
 private:
     PersistantService *ps;
-    QList<QString> bridgeList;
+    QList<Bridge *> bridgeList;
     QStandardItemModel *model;
 private slots:
     void bridgeFound(QString bridgeName);
     void portFound(QString bridgeName, QString portName);
+    void interfaceFound(QString bridgeName, QString portName, QString interfaceName);
 };
 
 #endif // CONTROLLER_H

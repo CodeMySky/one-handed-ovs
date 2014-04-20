@@ -21,10 +21,12 @@ private:
     Ui::MainWindow *ui;
     Controller *controller;
     QList<QTreeWidgetItem *> bridgeItemList;
+    QList<QList<QTreeWidgetItem *> * > portItemList;
 
 private slots:
     void echoBridge(QString bridgeName);
     void echoPort(int index, QString bridgeName);
+    void echoInterface(int brIndex, int portIndex, QString interfaceName);
     void treeClicked(QTreeWidgetItem* item, int col);
     void on_startOvsBtn_clicked();
 };

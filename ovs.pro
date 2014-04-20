@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     persistantservice.cpp \
     controller.cpp \
-    bridge.cpp
+    bridge.cpp \
+    port.cpp
 
 HEADERS  += mainwindow.h \
     persistantservice.h \
     controller.h \
-    bridge.h
+    bridge.h \
+    port.h
 
 FORMS    += mainwindow.ui

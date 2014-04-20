@@ -51,7 +51,7 @@ void PersistantService::onOvsVswitchdStarted() {
 void PersistantService::listBridges() {
     QString query("gksudo");
     QStringList arguments;
-    arguments << "ovs-vsctl list-br";
+    arguments << "ovs-vsctl show";
     process->waitForFinished();
     connect(process,SIGNAL(finished(int)),this,SLOT(readBridge()));
     connect(process,SIGNAL(finished(int)),this,SLOT(onListBridgeEnd()));
@@ -63,8 +63,31 @@ void PersistantService::readBridge() {
     QString stdout = process->readAllStandardOutput().trimmed();
     QStringList brList = stdout.split("\n");
     for (int i=0;i<brList.length();i++) {
-        emit bridgeFound(brList[i]);
-        //qDebug()<<brList[i].trimmed();
+        QRegExp exp("([\\w:]+) ([\\w.\"_{}=]+)"), quot("\"");
+        exp.indexIn(brList[i]);
+        QString key = exp.cap(1), value = exp.cap(2);
+        if (key == "Bridge" || key == "Port" || key == "Interface") {
+            quot.indexIn(value);
+            value = value.replace(quot,"");
+        }
+        if (key == "Bridge") {
+            currentBridge = value;
+            qDebug()<<"bridge found in console"<<currentBridge;
+            emit bridgeFound(currentBridge);
+        } else if (key == "Port") {
+            currentPort = value;
+            qDebug()<<"port found in console"<<currentPort;
+            emit portFound(currentBridge,currentPort);
+        } else if (key == "Interface") {
+            currentInterface = value;
+            qDebug()<<"interface found in console"<<currentInterface;
+            emit interfaceFound(currentBridge, currentPort, currentInterface);
+        } else if (key == "type:") {
+
+        } else if (key == "options:") {
+            QJsonDocument json;
+            json = QJsonDocument::fromBinaryData(value.toLocal8Bit());
+        }
     }
     qDebug()<<"Once";
     //qDebug() <<brList;

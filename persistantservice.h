@@ -4,7 +4,8 @@
 #include <QObject>
 #include <QProcess>
 #include <QStringList>
-#include <QMutex>
+#include <QJsonDocument>
+
 class PersistantService : public QObject
 {
     Q_OBJECT
@@ -15,7 +16,8 @@ signals:
     void isOVSRunning();
     void ovsStarted();
     void bridgeFound(QString);
-    void portFound(QString,QString);
+    void portFound(QString, QString);
+    void interfaceFound(QString, QString, QString);
 public:
     void run();
     void startOvs();
@@ -38,6 +40,9 @@ private slots:
 private:
     QProcess * process;
     QStringList tempBridgeList;
+    QString currentBridge;
+    QString currentPort;
+    QString currentInterface;
 };
 
 

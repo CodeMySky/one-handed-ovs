@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QProcess>
 #include <QStringList>
-#include <QJsonDocument>
 #include <QTimer>
 
 class PersistantService : public QObject
@@ -19,6 +18,7 @@ signals:
     void portFound(QString, QString);
     void interfaceFound(QString, QString, QString);
     void interfaceTypeFound(QString, QString, QString, QString);
+    void interfaceAttrFound(QString, QString, QString, QString, QString);
     void execErrorFound(QString);
     void needRefresh();
 

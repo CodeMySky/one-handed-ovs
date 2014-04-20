@@ -21,5 +21,19 @@ QStringList Interface::info() {
     QStringList sl;
     if (this->getType().length())
         sl<<"Type:"<<this->getType();
+    QMap<QString,QString>::iterator it = _options.begin();
+    QStringList options;
+    while (it!=_options.end()) {
+        options.append(it.key() + " : " + it.value());
+        it++;
+    }
+    if (options.length() > 0) {
+        sl<<"Options:";
+        sl.append(options);
+    }
     return sl;
+}
+
+void Interface::setOptions(QString key, QString value) {
+    _options[key] = value;
 }

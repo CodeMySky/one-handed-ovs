@@ -74,8 +74,8 @@ void PersistantService::listStatus() {
 void PersistantService::readStatus() {
     QString stdout = process->readAllStandardOutput().trimmed();
     QStringList brList = stdout.split("\n");
+    QRegExp exp("([\\w:]+) ([\\w.\"_{}=]+)"), quot("\""), bracket("[{}]"), pair("([\\w_]+)=([\\w\.-]+)");
     for (int i=0;i<brList.length();i++) {
-        QRegExp exp("([\\w:]+) ([\\w.\"_{}=]+)"), quot("\"");
         exp.indexIn(brList[i]);
         QString key = exp.cap(1), value = exp.cap(2);
         if (key == "Bridge" || key == "Port" || key == "Interface") {
@@ -94,8 +94,11 @@ void PersistantService::readStatus() {
         } else if (key == "type:") {
             emit interfaceTypeFound(currentBridge, currentPort, currentInterface, value);
         } else if (key == "options:") {
-            QJsonDocument json;
-            json = QJsonDocument::fromBinaryData(value.toLocal8Bit());
+            value = value.replace(bracket, "");
+            value = value.replace(quot, "");
+            pair.indexIn(value);
+            key = pair.cap(1);value = pair.cap(2);
+            emit interfaceAttrFound(currentBridge, currentPort, currentInterface, key, value);
         }
     }
 }

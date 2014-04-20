@@ -36,6 +36,7 @@ private slots:
     void portFound(QString bridgeName, QString portName);
     void interfaceFound(QString bridgeName, QString portName, QString interfaceName);
     void interfaceTypeFound(QString bridgeName, QString portName, QString interfaceName, QString type);
+    void interfaceAttrFound(QString bridgeName, QString portName, QString interfaceName, QString key, QString value);
     void execErrorFound(QString err);
 };
 

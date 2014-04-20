@@ -9,6 +9,8 @@ Controller::Controller(QObject *parent) :
     connect(ps, SIGNAL(interfaceFound(QString,QString,QString)),this,SLOT(interfaceFound(QString,QString,QString)));
     connect(ps, SIGNAL(interfaceTypeFound(QString,QString,QString,QString)),
             this, SLOT(interfaceTypeFound(QString,QString,QString,QString)));
+    connect(ps, SIGNAL(interfaceAttrFound(QString,QString,QString,QString,QString)),
+            this, SLOT(interfaceAttrFound(QString,QString,QString,QString,QString)));
     connect(ps, SIGNAL(execErrorFound(QString)), this, SLOT(execErrorFound(QString)));
     connect(ps,SIGNAL(needRefresh()),this,SLOT(refreshOvs()));
     connect(ps, SIGNAL(ovsStarted()),this,SLOT(refreshOvs()));
@@ -48,6 +50,14 @@ void Controller::interfaceTypeFound(QString bridgeName, QString portName, QStrin
     for (int i=0;i<bridgeList.length();i++) {
         if (bridgeList[i]->getName() == bridgeName) {
             bridgeList[i]->getPort(portName)->getInterface(interfaceName)->setType(type);
+        }
+    }
+}
+
+void Controller::interfaceAttrFound(QString bridgeName, QString portName, QString interfaceName, QString key, QString value){
+    for (int i=0;i<bridgeList.length();i++) {
+        if (bridgeList[i]->getName() == bridgeName) {
+            bridgeList[i]->getPort(portName)->getInterface(interfaceName)->setOptions(key, value);
         }
     }
 }

@@ -80,12 +80,20 @@ QString Controller::getInfo(QString type, QStringList nameList) {
     return "No description";
 }
 
-void Controller::addBridge(QString name) {
-    ps->addBridge(name);
+void Controller::addBridge(QString bridgeName) {
+    ps->addBridge(bridgeName);
 }
 
-void Controller::deleteBridge(QString name) {
-    ps->deleteBridge(name);
+void Controller::deleteBridge(QString bridgeName) {
+    ps->deleteBridge(bridgeName);
+}
+
+void Controller::addPort(QString bridgeName, QString portName) {
+    ps->addPort(bridgeName, portName);
+}
+
+void Controller::deletePort(QString bridgeName, QString portName) {
+    ps->deletePort(bridgeName, portName);
 }
 
 void Controller::startOvs() {

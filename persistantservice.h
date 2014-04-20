@@ -27,6 +27,8 @@ public:
     void listStatus();
     void addBridge(QString bridgeName);
     void deleteBridge(QString bridgeName);
+    void addPort(QString bridgeName, QString portName);
+    void deletePort(QString bridgeName, QString portName);
 
 public slots:
 private slots:

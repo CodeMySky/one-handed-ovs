@@ -15,7 +15,8 @@ public:
     QString getInfo(QString type, QStringList nameList);
     void addBridge(QString);
     void deleteBridge(QString);
-
+    void addPort(QString, QString);
+    void deletePort(QString, QString);
 signals:
     void bridgeConfirmed(QString);
     void portConfirmed(int, QString);

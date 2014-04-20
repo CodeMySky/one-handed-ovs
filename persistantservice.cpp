@@ -126,3 +126,26 @@ void PersistantService::deleteBridge(QString bridgeName) {
     process->start(query, arguments);
     process->waitForFinished();
 }
+
+void PersistantService::addPort(QString bridgeName, QString portName) {
+    QString query("gksudo");
+    QStringList arguments;
+    arguments << QString("ovs-vsctl add-port %1 %2").arg(bridgeName).arg(portName);
+    qDebug()<<arguments;
+    currentBridge = bridgeName;
+    connect(process, SIGNAL(finished(int)), this, SLOT(onNormalProcessEnd()));
+    process->start(query, arguments);
+    process->waitForFinished();
+}
+
+void PersistantService::deletePort(QString bridgeName, QString portName) {
+    QString query("gksudo");
+    QStringList arguments;
+    arguments << QString("ovs-vsctl del-port %1 %2").arg(bridgeName).arg(portName);
+    qDebug()<<arguments;
+    currentBridge = bridgeName;
+    connect(process, SIGNAL(finished(int)), this, SLOT(onNormalProcessEnd()));
+    process->start(query, arguments);
+    process->waitForFinished();
+}
+

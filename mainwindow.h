@@ -36,6 +36,7 @@ private slots:
     void on_addBridgeBtn_clicked();
     void on_deleteBtn_clicked();
 
+    void on_addPortBtn_clicked();
 };
 
 #endif // MAINWINDOW_H

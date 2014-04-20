@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QStringList>
 #include "port.h"
 class Bridge : public QObject
 {
@@ -12,13 +13,15 @@ public:
     void addPort(QString);
     QString getName();
     int indexOf(QString portName);
+    Port * getPort(QString portName);
+    QStringList info();
 signals:
 
 public slots:
 
 private:
     QString _name;
-    QList<Port*> ports;
+    QList<Port*> portList;
 
 };
 

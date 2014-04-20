@@ -2,19 +2,25 @@
 #define PORT_H
 
 #include <QObject>
-
+#include <QList>
+#include <QStringList>
+#include "interface.h"
 class Port : public QObject
 {
     Q_OBJECT
 public:
     explicit Port(QString,QObject *parent = 0);
     QString getName();
+    QStringList info();
+    void addInterface(QString name);
+    Interface * getInterface(QString name);
 signals:
 
 public slots:
 
 private:
     QString _name;
+    QList<Interface *> interfaceList;
 
 };
 

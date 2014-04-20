@@ -10,12 +10,25 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(controller,SIGNAL(bridgeConfirmed(QString)),this,SLOT(echoBridge(QString)));
     connect(controller,SIGNAL(portConfirmed(int,QString)),this,SLOT(echoPort(int,QString)));
     connect(controller,SIGNAL(interfaceConfirmed(int,int,QString)),this,SLOT(echoInterface(int,int,QString)));
+    connect(controller,SIGNAL(execErrorConfirmed(QString)), this, SLOT(echoError(QString)));
+    connect(ui->refreshButton,SIGNAL(clicked()),controller,SLOT(refreshOvs()));
+    connect(controller,SIGNAL(clearAll()),this,SLOT(clearAll()));
+    connect(ui->treeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(treeClicked()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::clearAll() {
+    disconnect(ui->treeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(treeClicked()));
+    ui->treeWidget->clear();
+    bridgeItemList.clear();
+    portItemList.clear();
+    connect(ui->treeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(treeClicked()));
+}
+
 
 void MainWindow::echoBridge(QString bridgeName) {
     QTreeWidgetItem *bridgeItem = new QTreeWidgetItem(ui->treeWidget,QStringList(bridgeName));
@@ -26,25 +39,68 @@ void MainWindow::echoBridge(QString bridgeName) {
 
 void MainWindow::echoPort(int index, QString portName) {
     QTreeWidgetItem *portItem = new QTreeWidgetItem(bridgeItemList[index], QStringList(portName));
-    connect(ui->treeWidget,SIGNAL(itemClicked(QTreeWidgetItem*,int)),
-            this,SLOT(treeClicked(QTreeWidgetItem*,int)));
     portItemList[index]->append(portItem);
-    qDebug()<<"inserting port"<<portName;
 }
 
 void MainWindow::echoInterface(int brIndex,int portIndex, QString interfaceName) {
     QTreeWidgetItem *interfaceItem = new QTreeWidgetItem(portItemList[brIndex]->at(portIndex), QStringList(interfaceName));
-    qDebug()<<"inserting interface"<<interfaceName;
+}
+
+void MainWindow::treeClicked() {
+    QStringList nameList;
+    QTreeWidgetItem * item = ui->treeWidget->selectedItems()[0];
+    QString info = "No description";
+    if (item->parent()) {
+        if (item->parent()->parent()) {
+            nameList << item->parent()->parent()->text(0);
+            nameList << item->parent()->text(0);
+            nameList << item->text(0);
+            info = controller->getInfo("Interface", nameList);
+        } else {
+            nameList << item->parent()->text(0) <<item->text(0);
+            info = controller->getInfo("Port", nameList);
+        }
+    } else {
+        nameList<<item->text(0);
+        info = controller->getInfo("Bridge", nameList);
+
+    }
+    ui->displayLabel->setText(info);
 }
 
 void MainWindow::on_startOvsBtn_clicked()
 {
-    qDebug()<<"Starting Ovs";
     controller->startOvs();
 }
 
-void MainWindow::treeClicked(QTreeWidgetItem *item, int col) {
-    if (item->parent()) {
-        //controller->
+
+void MainWindow::on_addBridgeBtn_clicked()
+{
+    QString input = QInputDialog::getText(this,
+        "Prompt",
+        "Please input bridge name",QLineEdit::Normal,
+        "br0",0,0);
+    if (input.length() > 0) {
+        controller->addBridge(input);
+    }
+}
+
+void MainWindow::echoError(QString err) {
+    QMessageBox msgBox;
+    msgBox.setText(err);
+    msgBox.exec();
+}
+
+void MainWindow::on_deleteBtn_clicked()
+{
+    QMessageBox msgBox;
+    msgBox.setText(QString("You are about to delete a %1. It can not be reverted").arg("Bridge"));
+    msgBox.setInformativeText("Do you want to continue?");
+    msgBox.setStandardButtons( QMessageBox::No | QMessageBox::Yes);
+    msgBox.setDefaultButton(QMessageBox::No);
+    int ret = msgBox.exec();
+    if (ret == QMessageBox::Yes) {
+        QString name = ui->treeWidget->currentItem()[0].text(0);
+        controller->deleteBridge(name);
     }
 }

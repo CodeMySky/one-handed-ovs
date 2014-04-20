@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QStringList>
 #include <QJsonDocument>
+#include <QTimer>
 
 class PersistantService : public QObject
 {
@@ -13,33 +14,35 @@ public:
     explicit PersistantService(QObject *parent = 0);
 
 signals:
-    void isOVSRunning();
     void ovsStarted();
     void bridgeFound(QString);
     void portFound(QString, QString);
     void interfaceFound(QString, QString, QString);
+    void interfaceTypeFound(QString, QString, QString, QString);
+    void execErrorFound(QString);
+    void needRefresh();
+
 public:
-    void run();
     void startOvs();
-    void listBridges();
-    void listPorts(QString bridgeName, bool hasWaited = false);
+    void listStatus();
+    void addBridge(QString bridgeName);
+    void deleteBridge(QString bridgeName);
+
 public slots:
 private slots:
-    void readOutput();
-    void onStarted();
-    void onFinished();
+    //common
+    void wakeWatchDog();
+    void killProcess();
+    void onNormalProcessEnd();
     //startOvs
     void onOvsServerStarted();
     void onOvsVswitchdStarted();
-    //listBridges()
-    void readBridge();
-    void onListBridgeEnd();
-    //listPorts()
-    void readPort();
-    void onListPortEnd();
+    //listStatus()
+    void readStatus();
+    void onListStatusEnd();
 private:
     QProcess * process;
-    QStringList tempBridgeList;
+    QTimer * watchDog;
     QString currentBridge;
     QString currentPort;
     QString currentInterface;

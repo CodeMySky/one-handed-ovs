@@ -7,8 +7,12 @@ Controller::Controller(QObject *parent) :
     connect(ps,SIGNAL(bridgeFound(QString)),this,SLOT(bridgeFound(QString)));
     connect(ps,SIGNAL(portFound(QString,QString)),this,SLOT(portFound(QString,QString)));
     connect(ps, SIGNAL(interfaceFound(QString,QString,QString)),this,SLOT(interfaceFound(QString,QString,QString)));
+    connect(ps, SIGNAL(interfaceTypeFound(QString,QString,QString,QString)),
+            this, SLOT(interfaceTypeFound(QString,QString,QString,QString)));
+    connect(ps, SIGNAL(execErrorFound(QString)), this, SLOT(execErrorFound(QString)));
+    connect(ps,SIGNAL(needRefresh()),this,SLOT(refreshOvs()));
+    connect(ps, SIGNAL(ovsStarted()),this,SLOT(refreshOvs()));
     ps->startOvs();
-    qDebug()<<"Controller init end";
 }
 
 void Controller::bridgeFound(QString bridgeName) {
@@ -32,6 +36,7 @@ void Controller::interfaceFound(QString bridgeName, QString portName, QString in
         if (bridgeList[i]->getName() == bridgeName) {
             int portIndex = bridgeList[i]->indexOf(portName);
             if (portIndex > -1) {
+                bridgeList[i]->getPort(portName)->addInterface(interfaceName);
                 emit interfaceConfirmed(i, portIndex, interfaceName);
             }
             break;
@@ -39,6 +44,62 @@ void Controller::interfaceFound(QString bridgeName, QString portName, QString in
     }
 }
 
+void Controller::interfaceTypeFound(QString bridgeName, QString portName, QString interfaceName, QString type) {
+    for (int i=0;i<bridgeList.length();i++) {
+        if (bridgeList[i]->getName() == bridgeName) {
+            bridgeList[i]->getPort(portName)->getInterface(interfaceName)->setType(type);
+        }
+    }
+}
+
+QString Controller::getInfo(QString type, QStringList nameList) {
+    if (type == "Bridge") {
+        for (int i=0;i<bridgeList.length();i++) {
+            if (bridgeList[i]->getName() == nameList[0]) {
+                QStringList info = bridgeList[i]->info();
+                return info.join("\n");
+            }
+        }
+    } else if (type == "Port") {
+        if (nameList.length() == 2) {
+            for (int i=0;i<bridgeList.length();i++) {
+                if (bridgeList[i]->getName() == nameList[0]) {
+                    QStringList info = bridgeList[i]->getPort(nameList[1])->info();
+                    return info.join("\n");
+                }
+            }
+        }
+    } else if (type == "Interface") {
+        for (int i=0;i<bridgeList.length();i++) {
+            if (bridgeList[i]->getName() == nameList[0]) {
+                QStringList info = bridgeList[i]->getPort(nameList[1])->getInterface(nameList[2])->info();
+                return info.join("\n");
+            }
+        }
+    }
+    return "No description";
+}
+
+void Controller::addBridge(QString name) {
+    ps->addBridge(name);
+}
+
+void Controller::deleteBridge(QString name) {
+    ps->deleteBridge(name);
+}
+
 void Controller::startOvs() {
     ps->startOvs();
+}
+
+void Controller::refreshOvs() {
+    qDebug()<<"INFO: refresh";
+    bridgeList.clear();
+    emit clearAll();
+    ps->listStatus();
+}
+
+void Controller::execErrorFound(QString err) {
+    qDebug()<<"ERROR:"<<err;
+    emit execErrorConfirmed(err);
 }

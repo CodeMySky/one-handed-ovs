@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QList>
 #include <QTreeWidgetItem>
+#include <QInputDialog>
+#include <QMessageBox>
 #include "controller.h"
 namespace Ui {
 class MainWindow;
@@ -24,11 +26,16 @@ private:
     QList<QList<QTreeWidgetItem *> * > portItemList;
 
 private slots:
+    void clearAll();
     void echoBridge(QString bridgeName);
     void echoPort(int index, QString bridgeName);
     void echoInterface(int brIndex, int portIndex, QString interfaceName);
-    void treeClicked(QTreeWidgetItem* item, int col);
+    void echoError(QString);
+    void treeClicked();
     void on_startOvsBtn_clicked();
+    void on_addBridgeBtn_clicked();
+    void on_deleteBtn_clicked();
+
 };
 
 #endif // MAINWINDOW_H

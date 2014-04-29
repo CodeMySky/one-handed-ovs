@@ -1,7 +1,6 @@
 #include "persistantservice.h"
 #include <QDebug>
-#include <iostream>
-#include <cstdlib>
+
 PersistantService::PersistantService(QObject *parent) :
     QObject(parent)
 {
@@ -10,7 +9,6 @@ PersistantService::PersistantService(QObject *parent) :
     connect(process,SIGNAL(started()),this,SLOT(wakeWatchDog()));
     connect(process,SIGNAL(finished(int)),watchDog,SLOT(stop()));
     connect(watchDog,SIGNAL(timeout()),this,SLOT(killProcess()));
-
 }
 
 void PersistantService::wakeWatchDog() {
@@ -74,7 +72,7 @@ void PersistantService::listStatus() {
 void PersistantService::readStatus() {
     QString stdout = process->readAllStandardOutput().trimmed();
     QStringList brList = stdout.split("\n");
-    QRegExp exp("([\\w:]+) ([\\w.\"_{}=]+)"), quot("\""), bracket("[{}]"), pair("([\\w_]+)=([\\w\.-]+)");
+    QRegExp exp("([\\w:]+) ([\\w.\"_{}= ,]+)"), quot("\""), bracket("[{}]"), pair("([\\w_]+)=([\\w\\.-]+)");
     for (int i=0;i<brList.length();i++) {
         exp.indexIn(brList[i]);
         QString key = exp.cap(1), value = exp.cap(2);
@@ -96,9 +94,14 @@ void PersistantService::readStatus() {
         } else if (key == "options:") {
             value = value.replace(bracket, "");
             value = value.replace(quot, "");
-            pair.indexIn(value);
-            key = pair.cap(1);value = pair.cap(2);
-            emit interfaceAttrFound(currentBridge, currentPort, currentInterface, key, value);
+            QString options = value;
+            QStringList optionList = options.split(',');
+            for (int i=0;i<optionList.length();i++) {
+                pair.indexIn(optionList[i].trimmed());
+                key = pair.cap(1);value = pair.cap(2);
+                emit interfaceAttrFound(currentBridge, currentPort, currentInterface, key, value);
+            }
+
         }
     }
 }
@@ -152,3 +155,35 @@ void PersistantService::deletePort(QString bridgeName, QString portName) {
     process->waitForFinished();
 }
 
+QJsonObject PersistantService::readJson(QString path) {
+    QFile file(path);
+    QString data = "";
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug()<<"Can't open the file!"<<endl;
+        emit execErrorFound(path + " open error");
+    }
+    QTextStream in(&file);
+    while( !in.atEnd()){
+        QString line = in.readLine();
+        data += line;
+    }
+    QJsonDocument json =  QJsonDocument::fromJson(data.toLatin1());
+    QJsonObject obj = json.object();
+    return obj;
+}
+
+void PersistantService::setInterface(QString interfaceName, QString type, QStringList options) {
+    QString query("gksudo");
+    QStringList arguments;
+    QString cmd = QString("ovs-vsctl set interface %1 ").arg(interfaceName);
+    if (type.length() > 1) cmd.append(QString(" type=%1 ").arg(type));
+    while (options.length() >= 2) {
+        cmd.append(QString(" options:%1=%2 ").arg(options[0]).arg(options[1]));
+        options.pop_front();
+        options.pop_front();
+    }
+    arguments <<cmd;
+    connect(process, SIGNAL(finished(int)), this, SLOT(onNormalProcessEnd()));
+    process->start(query, arguments);
+    process->waitForFinished();
+}

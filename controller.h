@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include <QList>
-#include <QStandardItemModel>
+#include <QJsonArray>
+
 #include "persistantservice.h"
 #include "bridge.h"
 class Controller : public QObject
@@ -11,21 +12,25 @@ class Controller : public QObject
     Q_OBJECT
 public:
     explicit Controller(QObject *parent = 0);
-    void startOvs();
     QString getInfo(QString type, QStringList nameList);
     void addBridge(QString);
     void deleteBridge(QString);
     void addPort(QString, QString);
     void deletePort(QString, QString);
+    void readNVO3(QString type);
+public slots:
+    void startOvs();
 signals:
     void bridgeConfirmed(QString);
     void portConfirmed(int, QString);
     void interfaceConfirmed(int, int, QString);
     void execErrorConfirmed(QString);
+    void nvo3DataConfirmed(QStringList);
     void clearAll();
 
 public slots:
     void refreshOvs();
+    void setInterface(QString interfaceName, QString type, QStringList options);
 
 private:
     PersistantService *ps;

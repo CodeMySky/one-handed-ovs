@@ -11,9 +11,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(controller,SIGNAL(portConfirmed(int,QString)),this,SLOT(echoPort(int,QString)));
     connect(controller,SIGNAL(interfaceConfirmed(int,int,QString)),this,SLOT(echoInterface(int,int,QString)));
     connect(controller,SIGNAL(execErrorConfirmed(QString)), this, SLOT(echoError(QString)));
-    connect(ui->refreshButton,SIGNAL(clicked()),controller,SLOT(refreshOvs()));
     connect(controller,SIGNAL(clearAll()),this,SLOT(clearAll()));
     connect(ui->treeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(treeClicked()));
+    //ui->deleteBtn->setShortcut(QKeySequence::Delete);
+
+    //connect context menu
+    connect(ui->treeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showMenu()));
+
+    //connecting menu
+    connect(ui->action_start_ovs, SIGNAL(triggered()), controller, SLOT(startOvs()));
+    connect(ui->action_refresh, SIGNAL(triggered()), controller, SLOT(refreshOvs()));
+    ui->action_refresh->setShortcut(QKeySequence("F5"));
+
 }
 
 MainWindow::~MainWindow()
@@ -50,40 +59,28 @@ void MainWindow::treeClicked() {
     QStringList nameList;
     QTreeWidgetItem * item = ui->treeWidget->selectedItems()[0];
     QString info = "No description";
-    ui->addPortBtn->setEnabled(false);
-    ui->setBtn->setEnabled(false);
-    ui->deleteBtn->setEnabled(true);
     if (item->parent()) {
         if (item->parent()->parent()) {
             nameList << item->parent()->parent()->text(0);
             nameList << item->parent()->text(0);
             nameList << item->text(0);
             info = controller->getInfo("Interface", nameList);
-            ui->deleteBtn->setEnabled(false);
         } else {
             nameList << item->parent()->text(0) <<item->text(0);
             info = controller->getInfo("Port", nameList);
-            ui->setBtn->setEnabled(true);
         }
     } else {
         nameList<<item->text(0);
         info = controller->getInfo("Bridge", nameList);
-        ui->addPortBtn->setEnabled(true);
     }
     ui->displayLabel->setText(info);
 }
 
-void MainWindow::on_startOvsBtn_clicked()
-{
-    controller->startOvs();
-}
-
-
-void MainWindow::on_addBridgeBtn_clicked()
+void MainWindow::on_action_add_br_triggered()
 {
     QString input = QInputDialog::getText(this,
-        "Prompt",
-        "Please input bridge name",QLineEdit::Normal,
+        "提示",
+        "请输入网桥名称",QLineEdit::Normal,
         "br0",0,0);
     if (input.length() > 0) {
         controller->addBridge(input);
@@ -96,7 +93,7 @@ void MainWindow::echoError(QString err) {
     msgBox.exec();
 }
 
-void MainWindow::on_deleteBtn_clicked()
+void MainWindow::deleteSth()
 {
     QString name = ui->treeWidget->currentItem()[0].text(0);
     QString type;
@@ -112,12 +109,11 @@ void MainWindow::on_deleteBtn_clicked()
         type = "Bridge";
     }
     QMessageBox msgBox;
-    msgBox.setText(QString("You are about to delete a %1. It can not be reverted").arg(type));
-    msgBox.setInformativeText("Do you want to continue?");
+    msgBox.setText(QString("你将要删除 %1. 此操作不可逆").arg(type));
+    msgBox.setInformativeText("是否继续？");
     msgBox.setStandardButtons( QMessageBox::No | QMessageBox::Yes);
     msgBox.setDefaultButton(QMessageBox::No);
     int ret = msgBox.exec();
-
 
     if (ret == QMessageBox::Yes) {
         if (type == "Bridge") {
@@ -130,16 +126,113 @@ void MainWindow::on_deleteBtn_clicked()
     }
 }
 
-void MainWindow::on_addPortBtn_clicked()
+void MainWindow::addPort()
 {
     QTreeWidgetItem * br = ui->treeWidget->selectedItems()[0];
     if (br && !br->parent()) {
         QString input = QInputDialog::getText(this,
-            "Prompt",
-            "Please input Port name",QLineEdit::Normal,
-            "eth0",0,0);
+            tr("提示"),
+            "请输入Port名称",QLineEdit::Normal,
+            "vxa",0,0);
         if (input.length() > 0) {
             controller->addPort(br->text(0), input);
         }
     }
+
+}
+
+void MainWindow::setInterface()
+{
+    QString interfaceName = ui->treeWidget->selectedItems()[0]->text(0);
+    setPortDialog *d = new setPortDialog(interfaceName);
+    connect(d, SIGNAL(setPort(QString,QString,QStringList)), controller, SLOT(setInterface(QString,QString,QStringList)));
+    d->exec();
+}
+
+void MainWindow::showMenu() {
+    QMenu *menu = new QMenu(this);
+    QTreeWidgetItem * currentItem = ui->treeWidget->selectedItems()[0];
+    if (currentItem->parent()) {
+        if (currentItem->parent()->parent()) {
+            //is an interface
+            QAction * action_set_interface = menu->addAction(tr("设置接口"));
+            connect(action_set_interface, SIGNAL(triggered()), this, SLOT(setInterface()));
+        } else {
+            //is a port
+            QAction * action_delete = menu->addAction(tr("删除"));
+            connect(action_delete, SIGNAL(triggered()), this, SLOT(deleteSth()));
+            connect(menu, SIGNAL(destroyed()), action_delete, SLOT(deleteLater()));
+        }
+    } else {
+        // it is a bridge
+        QAction * action_add_port = menu->addAction(tr("增加端口"));
+        connect(action_add_port,SIGNAL(triggered()), this, SLOT(addPort()));
+        connect(menu, SIGNAL(destroyed()), action_add_port, SLOT(deleteLater()));
+        QAction * action_delete = menu->addAction(tr("删除"));
+        connect(action_delete, SIGNAL(triggered()), this, SLOT(deleteSth()));
+        connect(menu, SIGNAL(destroyed()), action_delete, SLOT(deleteLater()));
+    }
+    menu->exec(QCursor::pos());
+    delete menu;
+}
+
+
+void MainWindow::on_action_Br_VN_triggered() {
+    Nvo3Dialog *d = new Nvo3Dialog;
+    QStringList headers ;
+    headers <<"网桥名称"<<"网络号";
+    d->setHeaders(headers);
+    connect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    controller->readNVO3("BrVN");
+    d->exec();
+    disconnect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    delete d;
+}
+
+void MainWindow::on_action_Local_VN_IP_triggered() {
+    Nvo3Dialog *d = new Nvo3Dialog;
+    QStringList headers ;
+    headers<<"网络号"<<"IP";
+    d->setHeaders(headers);
+    connect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    controller->readNVO3("LocalVNIP");
+    disconnect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    d->exec();
+    delete d;
+}
+
+void MainWindow::on_action_VN_IP_triggered() {
+    Nvo3Dialog *d = new Nvo3Dialog;
+    QStringList headers ;
+    headers<<"网络号"<<"IP";
+    d->setHeaders(headers);
+    connect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    controller->readNVO3("VNIP");
+    disconnect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    d->exec();
+    delete d;
+}
+
+void MainWindow::on_action_VN_MAC_IP_triggered() {
+    Nvo3Dialog *d = new Nvo3Dialog;
+    QStringList headers ;
+    headers<<"网络号"<<"MAC"<<"IP";
+    d->setHeaders(headers);
+    connect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    controller->readNVO3("VNMACIP");
+    disconnect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    d->exec();
+    delete d;
+}
+
+void MainWindow::on_action_NVE_triggered(){
+    Nvo3Dialog *d = new Nvo3Dialog;
+    QStringList headers ;
+    headers<<"IP"<<"能力";
+    d->setHeaders(headers);
+    connect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    controller->readNVO3("NVE");
+    disconnect(controller, SIGNAL(nvo3DataConfirmed(QStringList)), d, SLOT(instertData(QStringList)));
+    d->exec();
+    delete d;
 }

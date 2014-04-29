@@ -67,7 +67,7 @@ QString Controller::getInfo(QString type, QStringList nameList) {
         for (int i=0;i<bridgeList.length();i++) {
             if (bridgeList[i]->getName() == nameList[0]) {
                 QStringList info = bridgeList[i]->info();
-                return info.join("\n");
+                return info.join(" ");
             }
         }
     } else if (type == "Port") {
@@ -75,7 +75,7 @@ QString Controller::getInfo(QString type, QStringList nameList) {
             for (int i=0;i<bridgeList.length();i++) {
                 if (bridgeList[i]->getName() == nameList[0]) {
                     QStringList info = bridgeList[i]->getPort(nameList[1])->info();
-                    return info.join("\n");
+                    return info.join(" ");
                 }
             }
         }
@@ -83,7 +83,7 @@ QString Controller::getInfo(QString type, QStringList nameList) {
         for (int i=0;i<bridgeList.length();i++) {
             if (bridgeList[i]->getName() == nameList[0]) {
                 QStringList info = bridgeList[i]->getPort(nameList[1])->getInterface(nameList[2])->info();
-                return info.join("\n");
+                return info.join(" ");
             }
         }
     }
@@ -120,4 +120,87 @@ void Controller::refreshOvs() {
 void Controller::execErrorFound(QString err) {
     qDebug()<<"ERROR:"<<err;
     emit execErrorConfirmed(err);
+}
+
+void Controller::readNVO3(QString type) {
+    if (type == "BrVN") {
+        QJsonObject result = ps->readJson("./data/brvnid");
+        QJsonObject obj = result["brvnid"].toObject();
+        QStringList keys = obj.keys();
+        for (int i=0;i<keys.length();i++) {
+            QStringList row;
+            row<<keys[i];
+            row<<obj[keys[i]].toString();
+            emit nvo3DataConfirmed(row);
+        }
+    } else if (type == "LocalVNIP") {
+        QJsonObject result = ps->readJson("./data/vnidip");
+        QJsonObject obj = result["vnidip"].toObject();
+        QStringList keys = obj.keys();
+        for (int i=0;i<keys.length();i++) {
+            QStringList row;
+            row<<keys[i];
+            row<<obj[keys[i]].toArray()[0].toString();
+            emit nvo3DataConfirmed(row);
+        }
+    } else if (type == "VNIP") {
+        //read Local VNIP
+        QJsonObject result = ps->readJson("./data/vnidip");
+        QJsonObject obj = result["vnidip"].toObject();
+        QStringList keys = obj.keys();
+        for (int i=0;i<keys.length();i++) {
+            QStringList row;
+            row<<keys[i];
+            row<<obj[keys[i]].toArray()[0].toString();
+            emit nvo3DataConfirmed(row);
+        }
+        //read Global VNIP
+        result = ps->readJson("./data/ip_write");
+        obj = result["vnidip"].toObject();
+        keys = obj.keys();
+        for (int i=0;i<keys.length();i++) {
+            QJsonArray array = obj[keys[i]].toArray();
+            for (int j=0;j<array.size();j++) {
+                QStringList row;
+                row<<keys[i];
+                row<<array[j].toString();
+                emit nvo3DataConfirmed(row);
+            }
+        }
+    } else if (type == "VNMACIP") {
+        QJsonObject vnidMac = ps->readJson("./data/mac_write");
+        QJsonObject macIp = ps->readJson("./data/mac_ip");
+        QJsonObject vnidMacObj = vnidMac["vnidmac"].toObject();
+        QJsonObject macIpObj = macIp["macip"].toObject();
+        QStringList keys = vnidMacObj.keys();
+        QStringList ips = macIpObj.keys();
+        for (int i=0;i<keys.length();i++) {
+            QStringList row;
+            row<<keys[i];
+            QString mac = vnidMacObj[keys[i]].toArray()[0].toString();
+            row<<mac;
+            for (int j=0;j<ips.length();j++){
+                if (macIpObj[ips[j]].toArray()[0].toString() == mac) {
+                    row<<ips[j];
+                    emit nvo3DataConfirmed(row);
+                    break;
+                }
+            }
+        }
+    } else if (type == "NVE") {
+        QJsonObject result = ps->readJson("./data/test_encap_write");
+        QJsonObject obj = result["ipencap"].toObject();
+        QStringList keys = obj.keys();
+        for (int i=0;i<keys.length();i++) {
+            QStringList row;
+            row<<keys[i];
+            row<<obj[keys[i]].toArray()[0].toString();
+            emit nvo3DataConfirmed(row);
+        }
+    }
+}
+
+void Controller::setInterface(QString interfaceName, QString type, QStringList options) {
+    if (interfaceName.length() == 0) return;
+    ps->setInterface(interfaceName, type, options);
 }

@@ -5,6 +5,9 @@
 #include <QProcess>
 #include <QStringList>
 #include <QTimer>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 class PersistantService : public QObject
 {
@@ -29,6 +32,9 @@ public:
     void deleteBridge(QString bridgeName);
     void addPort(QString bridgeName, QString portName);
     void deletePort(QString bridgeName, QString portName);
+    void setPort(QString type, QStringList optionList);
+    void setInterface(QString interfaceName, QString type, QStringList options);
+    QJsonObject readJson(QString path);
 
 public slots:
 private slots:

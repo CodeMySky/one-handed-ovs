@@ -18,13 +18,19 @@ SOURCES += main.cpp\
     controller.cpp \
     bridge.cpp \
     port.cpp \
-    interface.cpp
+    interface.cpp \
+    setportdialog.cpp \
+    nvo3dialog.cpp
 
 HEADERS  += mainwindow.h \
     persistantservice.h \
     controller.h \
     bridge.h \
     port.h \
-    interface.h
+    interface.h \
+    setportdialog.h \
+    nvo3dialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    setportdialog.ui \
+    nvo3dialog.ui

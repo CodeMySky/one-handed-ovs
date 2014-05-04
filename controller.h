@@ -12,11 +12,11 @@ class Controller : public QObject
     Q_OBJECT
 public:
     explicit Controller(QObject *parent = 0);
-    QString getInfo(QString type, QStringList nameList);
+    QString getInfo(QString type, int brIndex=-1, int portIndex=-1, int interfaceIndex=-1);
     void addBridge(QString);
-    void deleteBridge(QString);
-    void addPort(QString, QString);
-    void deletePort(QString, QString);
+    void deleteBridge(int brIndex);
+    void addPort(int brIndex, QString);
+    void deletePort(int brIndex, int portIndex);
     void readNVO3(QString type);
 public slots:
     void startOvs();
@@ -26,6 +26,7 @@ signals:
     void interfaceConfirmed(int, int, QString);
     void execErrorConfirmed(QString);
     void nvo3DataConfirmed(QStringList);
+    void keyConfirmed(int, QString);
     void clearAll();
 
 public slots:

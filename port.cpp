@@ -35,3 +35,9 @@ Interface * Port::getInterface(QString name) {
     }
     return NULL;
 }
+Interface * Port::getInterface(int index) {
+    if (index >=0 && index <= interfaceList.length()) {
+        return interfaceList[index];
+    }
+    return NULL;
+}

@@ -14,6 +14,7 @@ public:
     QStringList info();
     void addInterface(QString name);
     Interface * getInterface(QString name);
+    Interface * getInterface(int index);
 signals:
 
 public slots:

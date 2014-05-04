@@ -34,6 +34,7 @@ private slots:
     void echoPort(int index, QString bridgeName);
     void echoInterface(int brIndex, int portIndex, QString interfaceName);
     void echoError(QString);
+    void echoKey(int, QString);
     void treeClicked();
     void showMenu();
     void on_action_Br_VN_triggered();

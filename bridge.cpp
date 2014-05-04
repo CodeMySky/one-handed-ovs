@@ -32,6 +32,12 @@ Port * Bridge::getPort(QString portName) {
     return NULL;
 }
 
+Port * Bridge::getPort(int index) {
+    if (index >=0 && index <= portList.length())
+        return portList[index];
+    else return NULL;
+}
+
 QStringList Bridge::info() {
     QStringList sl;
     if (portList.length() == 0) {

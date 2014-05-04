@@ -14,6 +14,7 @@ public:
     QString getName();
     int indexOf(QString portName);
     Port * getPort(QString portName);
+    Port * getPort(int index);
     QStringList info();
 signals:
 

@@ -26,4 +26,5 @@ void setPortDialog::on_pushButton_clicked()
         options.append(ui->ipLineEdit->text());
     }
     emit setPort(_interfaceName,ui->typeComboBox->currentText(),options);
+    this->close();
 }

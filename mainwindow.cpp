@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(controller,SIGNAL(portConfirmed(int,QString)),this,SLOT(echoPort(int,QString)));
     connect(controller,SIGNAL(interfaceConfirmed(int,int,QString)),this,SLOT(echoInterface(int,int,QString)));
     connect(controller,SIGNAL(execErrorConfirmed(QString)), this, SLOT(echoError(QString)));
+    connect(controller, SIGNAL(keyConfirmed(int, QString)), this, SLOT(echoKey(int, QString)));
     connect(controller,SIGNAL(clearAll()),this,SLOT(clearAll()));
     connect(ui->treeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(treeClicked()));
     //ui->deleteBtn->setShortcut(QKeySequence::Delete);
@@ -55,23 +56,30 @@ void MainWindow::echoInterface(int brIndex,int portIndex, QString interfaceName)
     QTreeWidgetItem *interfaceItem = new QTreeWidgetItem(portItemList[brIndex]->at(portIndex), QStringList(interfaceName));
 }
 
+void MainWindow::echoKey(int brIndex, QString key) {
+    bridgeItemList[brIndex]->setText(0, key);
+}
+
 void MainWindow::treeClicked() {
-    QStringList nameList;
     QTreeWidgetItem * item = ui->treeWidget->selectedItems()[0];
     QString info = "No description";
     if (item->parent()) {
         if (item->parent()->parent()) {
-            nameList << item->parent()->parent()->text(0);
-            nameList << item->parent()->text(0);
-            nameList << item->text(0);
-            info = controller->getInfo("Interface", nameList);
+            QTreeWidgetItem * brWidget = item->parent()->parent();
+            QTreeWidgetItem * portWidget = item->parent();
+            int brIndex = ui->treeWidget->indexOfTopLevelItem(brWidget);
+            int portIndex = brWidget->indexOfChild(portWidget);
+            int interfaceIndex = portWidget->indexOfChild(item);
+            info = controller->getInfo("Interface", brIndex, portIndex, interfaceIndex);
         } else {
-            nameList << item->parent()->text(0) <<item->text(0);
-            info = controller->getInfo("Port", nameList);
+            QTreeWidgetItem * brWidget = item->parent();
+            int brIndex = ui->treeWidget->indexOfTopLevelItem(brWidget);
+            int portIndex = brWidget->indexOfChild(item);
+            info = controller->getInfo("Port", brIndex, portIndex);
         }
     } else {
-        nameList<<item->text(0);
-        info = controller->getInfo("Bridge", nameList);
+       int brIndex = ui->treeWidget->indexOfTopLevelItem(item);
+       info = controller->getInfo("Bridge", brIndex);
     }
     ui->displayLabel->setText(info);
 }
@@ -95,7 +103,6 @@ void MainWindow::echoError(QString err) {
 
 void MainWindow::deleteSth()
 {
-    QString name = ui->treeWidget->currentItem()[0].text(0);
     QString type;
     QTreeWidgetItem * item = ui->treeWidget->selectedItems()[0];
     if (!item) return;
@@ -117,9 +124,13 @@ void MainWindow::deleteSth()
 
     if (ret == QMessageBox::Yes) {
         if (type == "Bridge") {
-            controller->deleteBridge(name);
+            int brIndex = ui->treeWidget->indexOfTopLevelItem(item);
+            controller->deleteBridge(brIndex);
         } else if (type == "Port") {
-            controller->deletePort(item->parent()->text(0), name);
+            QTreeWidgetItem * brWidget = item->parent();
+            int brIndex = ui->treeWidget->indexOfTopLevelItem(brWidget);
+            int portIndex = brWidget->indexOfChild(item);
+            controller->deletePort(brIndex, portIndex);
         } else if (type == "Interface") {
 
         }
@@ -135,7 +146,7 @@ void MainWindow::addPort()
             "请输入Port名称",QLineEdit::Normal,
             "vxa",0,0);
         if (input.length() > 0) {
-            controller->addPort(br->text(0), input);
+            controller->addPort(ui->treeWidget->indexOfTopLevelItem(br), input);
         }
     }
 

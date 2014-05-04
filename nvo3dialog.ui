@@ -16,12 +16,21 @@
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>40</y>
-     <width>256</width>
-     <height>192</height>
+     <x>0</x>
+     <y>0</y>
+     <width>401</width>
+     <height>301</height>
     </rect>
    </property>
+   <property name="sortingEnabled">
+    <bool>false</bool>
+   </property>
+   <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
   </widget>
  </widget>
  <resources/>

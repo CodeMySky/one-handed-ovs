@@ -19,6 +19,7 @@ void Nvo3Dialog::setHeaders(QStringList labels) {
 }
 
 void Nvo3Dialog::instertData(QStringList dataList) {
+    ui->tableWidget->setSortingEnabled(false);
     QTableWidgetItem * w;
     ui->tableWidget->insertRow(0);
     for (int i=0;i<dataList.length();i++) {
@@ -26,4 +27,6 @@ void Nvo3Dialog::instertData(QStringList dataList) {
         w->setText(dataList[i]);
         ui->tableWidget->setItem(0,i,w);
     }
+    ui->tableWidget->sortItems(0);
+    ui->tableWidget->setSortingEnabled(true);
 }

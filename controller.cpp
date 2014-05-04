@@ -187,6 +187,22 @@ void Controller::readNVO3(QString type) {
                 }
             }
         }
+        QJsonObject localMac = ps->readJson("./data/vnid-mac");
+        QJsonObject localIp = ps->readJson("./data/vnidip");
+        QJsonObject localMacObj = localMac["vnidmac"].toObject();
+        QJsonObject localIpObj = localIp["vnidip"].toObject();
+        keys = localMacObj.keys();
+        for (int i=0;i<keys.length();i++) {
+            QString ip = localIpObj[keys[i]].toArray()[0].toString();
+            if (!ip.isEmpty()) {
+                QStringList row;
+                row << keys[i];
+                row << localMacObj[keys[i]].toArray()[0].toString();
+                row << ip;
+                emit nvo3DataConfirmed(row);
+                break;
+            }
+        }
     } else if (type == "NVE") {
         QJsonObject result = ps->readJson("./data/test_encap_write");
         QJsonObject obj = result["ipencap"].toObject();

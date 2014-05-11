@@ -17,6 +17,10 @@ QString Interface::getType() {
     return _type;
 }
 
+QString Interface::getKey() {
+    return _options["key"];
+}
+
 QStringList Interface::info() {
     QStringList sl;
     if (this->getType().length())

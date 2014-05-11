@@ -11,6 +11,7 @@ class Interface : public QObject
 public:
     explicit Interface(QString name, QObject *parent = 0);
     QString getName();
+    QString getKey();
     void setType(QString type);
     QString getType();
     QStringList info();

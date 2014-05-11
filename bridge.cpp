@@ -41,12 +41,9 @@ Port * Bridge::getPort(int index) {
 QStringList Bridge::info() {
     QStringList sl;
     if (portList.length() == 0) {
-        sl<<"No port";
+        sl<<"暂无端口";
     } else {
-        sl<<"Port List:";
-    }
-    for (int i=0;i<portList.length();i++) {
-        sl<<portList[i]->getName();
+        sl<<QString("VN:%1").arg(portList[0]->getKey());
     }
     return sl;
 }

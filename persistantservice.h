@@ -33,7 +33,8 @@ public:
     void addPort(QString bridgeName, QString portName);
     void deletePort(QString bridgeName, QString portName);
     void setPort(QString type, QStringList optionList);
-    void setInterface(QString interfaceName, QString type, QStringList options);
+    void setInterface(QString interfaceName, QMap<QString, QString> attrMap);
+    void listInterfaceAttr(QString interfaceName);
     QJsonObject readJson(QString path);
 
 public slots:
@@ -48,6 +49,9 @@ private slots:
     //listStatus()
     void readStatus();
     void onListStatusEnd();
+    void readInterfaceAttr();
+    void onListInterfaceAttrEnd();
+
 private:
     QProcess * process;
     QTimer * watchDog;

@@ -18,12 +18,14 @@ Controller::Controller(QObject *parent) :
 }
 
 void Controller::bridgeFound(QString bridgeName) {
+    if (bridgeName == "br0") return;
     Bridge *br = new Bridge(bridgeName);
     bridgeList.append(br);
     emit bridgeConfirmed(bridgeName);
 }
 
 void Controller::portFound(QString bridgeName, QString portName) {
+    if (bridgeName == portName) return;
     for (int i=0;i<bridgeList.length();i++) {
         if (bridgeList[i]->getName() == bridgeName) {
             bridgeList[i]->addPort(portName);
@@ -49,16 +51,25 @@ void Controller::interfaceFound(QString bridgeName, QString portName, QString in
 void Controller::interfaceTypeFound(QString bridgeName, QString portName, QString interfaceName, QString type) {
     for (int i=0;i<bridgeList.length();i++) {
         if (bridgeList[i]->getName() == bridgeName) {
-            bridgeList[i]->getPort(portName)->getInterface(interfaceName)->setType(type);
+            int portIndex = bridgeList[i]->indexOf(portName);
+            if (portIndex > -1) {
+                bridgeList[i]->getPort(portName)->getInterface(interfaceName)->setType(type);
+            }
+            break;
         }
     }
 }
 
 void Controller::interfaceAttrFound(QString bridgeName, QString portName, QString interfaceName, QString key, QString value){
-    for (int i=0;i<bridgeList.length();i++) {
-        if (bridgeList[i]->getName() == bridgeName) {
-            bridgeList[i]->getPort(portName)->getInterface(interfaceName)->setOptions(key, value);
-            if (key == "key") emit keyConfirmed(i, value);
+    if (bridgeName.isEmpty() && portName.isEmpty()) {
+        emit interfaceAttrConfirmed(key, value);
+    } else {
+        for (int i=0;i<bridgeList.length();i++) {
+            if (bridgeList[i]->getName() == bridgeName) {
+                bridgeList[i]->getPort(portName)->getInterface(interfaceName)->setOptions(key, value);
+                if (key == "key") emit keyConfirmed(i, value);
+                break;
+            }
         }
     }
 }
@@ -213,7 +224,11 @@ void Controller::readNVO3(QString type) {
     }
 }
 
-void Controller::setInterface(QString interfaceName, QString type, QStringList options) {
+void Controller::setInterface(QString interfaceName, QMap<QString, QString> attrMap) {
     if (interfaceName.length() == 0) return;
-    ps->setInterface(interfaceName, type, options);
+    ps->setInterface(interfaceName, attrMap);
+}
+
+void Controller::listInterfaceAttr(QString interfaceName) {
+    ps->listInterfaceAttr(interfaceName);
 }

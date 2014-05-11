@@ -11,10 +11,12 @@ class Port : public QObject
 public:
     explicit Port(QString,QObject *parent = 0);
     QString getName();
+    QString getKey();
     QStringList info();
     void addInterface(QString name);
     Interface * getInterface(QString name);
     Interface * getInterface(int index);
+
 signals:
 
 public slots:

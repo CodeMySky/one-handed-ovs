@@ -16,15 +16,33 @@ setPortDialog::~setPortDialog()
 
 void setPortDialog::on_pushButton_clicked()
 {
-    QStringList options;
+    QMap<QString, QString> attrMap;
     if (ui->keyLineEdit->text().length()>0) {
-        options.append("key");
-        options.append(ui->keyLineEdit->text());
+        attrMap["options:key"] = ui->keyLineEdit->text();
     }
     if (ui->ipLineEdit->text().length()>0) {
-        options.append("remote_ip");
-        options.append(ui->ipLineEdit->text());
+        attrMap["options:remote_ip"] = ui->ipLineEdit->text();
     }
-    emit setPort(_interfaceName,ui->typeComboBox->currentText(),options);
+    attrMap["ingress_policing_rate"] =  QString::number(ui->ingressPolicingRateSpinBox->value());
+    attrMap["ingress_policing_burst"] =  QString::number(ui->ingressPolicingBurstSpinBox->value());
+    attrMap["type"] = ui->typeComboBox->currentText();
+    emit setPort(_interfaceName, attrMap);
+    this->close();
+}
+
+void setPortDialog::echoPortAttr(QString key, QString value) {
+    if (key == "key") {
+        ui->keyLineEdit->setText(value);
+    } else if (key == "remote_ip") {
+        ui->ipLineEdit->setText(value);
+    } else if (key == "ingress_policing_rate") {
+        ui->ingressPolicingRateSpinBox->setValue(value.toInt());
+    } else if (key == "ingress_policing_burst") {
+        ui->ingressPolicingBurstSpinBox->setValue(value.toInt());
+    }
+}
+
+void setPortDialog::on_cancelButton_clicked()
+{
     this->close();
 }

@@ -18,6 +18,8 @@ public:
     void addPort(int brIndex, QString);
     void deletePort(int brIndex, int portIndex);
     void readNVO3(QString type);
+    void listInterfaceAttr(QString interfaceName);
+
 public slots:
     void startOvs();
 signals:
@@ -27,11 +29,12 @@ signals:
     void execErrorConfirmed(QString);
     void nvo3DataConfirmed(QStringList);
     void keyConfirmed(int, QString);
+    void interfaceAttrConfirmed(QString,QString);
     void clearAll();
 
 public slots:
     void refreshOvs();
-    void setInterface(QString interfaceName, QString type, QStringList options);
+    void setInterface(QString interfaceName, QMap<QString, QString> attrMap);
 
 private:
     PersistantService *ps;

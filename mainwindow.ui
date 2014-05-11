@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>OVS manage system</string>
+   <string>OVS管理系统</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTreeWidget" name="treeWidget">
@@ -57,68 +57,139 @@
    </property>
    <widget class="QMenu" name="menuMenu">
     <property name="title">
-     <string>菜单</string>
+     <string>文件</string>
     </property>
     <addaction name="action_start_ovs"/>
-    <addaction name="action_refresh"/>
     <addaction name="action_add_br"/>
+    <addaction name="action_refresh"/>
+    <addaction name="separator"/>
+    <addaction name="action_exit"/>
    </widget>
    <widget class="QMenu" name="menuNVO3">
     <property name="title">
-     <string>NVO3</string>
+     <string>查看</string>
     </property>
+    <widget class="QMenu" name="menuVN_IP">
+     <property name="title">
+      <string>VN与IP映射关系</string>
+     </property>
+     <property name="icon">
+      <iconset resource="icons.qrc">
+       <normaloff>:/icon/icons/VNIP.ico</normaloff>:/icon/icons/VNIP.ico</iconset>
+     </property>
+     <addaction name="action_Local_VN_IP"/>
+     <addaction name="action_VN_IP"/>
+    </widget>
     <addaction name="action_Br_VN"/>
-    <addaction name="action_Local_VN_IP"/>
-    <addaction name="action_VN_IP"/>
     <addaction name="action_VN_MAC_IP"/>
     <addaction name="action_NVE"/>
+    <addaction name="menuVN_IP"/>
+   </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>编辑</string>
+    </property>
+    <addaction name="action_delete"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuNVO3"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_start_ovs">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/start.ico</normaloff>:/icon/icons/start.ico</iconset>
+   </property>
    <property name="text">
     <string>启动OVS</string>
    </property>
   </action>
   <action name="action_refresh">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/refresh.ico</normaloff>:/icon/icons/refresh.ico</iconset>
+   </property>
    <property name="text">
     <string>刷新</string>
    </property>
   </action>
   <action name="action_add_br">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/plusCircle.ico</normaloff>:/icon/icons/plusCircle.ico</iconset>
+   </property>
    <property name="text">
-    <string>增加网桥</string>
+    <string>新建网桥</string>
    </property>
   </action>
   <action name="action_Br_VN">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/BRVN.ico</normaloff>:/icon/icons/BRVN.ico</iconset>
+   </property>
    <property name="text">
     <string>网桥与VN网络映射关系</string>
    </property>
   </action>
   <action name="action_Local_VN_IP">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/local.ico</normaloff>:/icon/icons/local.ico</iconset>
+   </property>
    <property name="text">
     <string>本机VN与IP映射关系</string>
    </property>
   </action>
   <action name="action_VN_IP">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/cloud.ico</normaloff>:/icon/icons/cloud.ico</iconset>
+   </property>
    <property name="text">
     <string>全网VN与IP映射关系</string>
    </property>
   </action>
   <action name="action_VN_MAC_IP">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/VNMACIP.ico</normaloff>:/icon/icons/VNMACIP.ico</iconset>
+   </property>
    <property name="text">
     <string>全网VN-MAC-IP映射</string>
    </property>
   </action>
   <action name="action_NVE">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/NVE.ico</normaloff>:/icon/icons/NVE.ico</iconset>
+   </property>
    <property name="text">
     <string>全网NVE封装能力</string>
    </property>
   </action>
+  <action name="action_exit">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/exit.ico</normaloff>:/icon/icons/exit.ico</iconset>
+   </property>
+   <property name="text">
+    <string>退出</string>
+   </property>
+  </action>
+  <action name="action_delete">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icon/icons/trash.ico</normaloff>:/icon/icons/trash.ico</iconset>
+   </property>
+   <property name="text">
+    <string>删除</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

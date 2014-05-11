@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/icon">
+        <file>icons/start.ico</file>
+        <file>icons/refresh.ico</file>
+        <file>icons/VNIP.ico</file>
+        <file>icons/NVE.ico</file>
+        <file>icons/plusCircle.ico</file>
+        <file>icons/exit.ico</file>
+        <file>icons/gears.ico</file>
+        <file>icons/trash.ico</file>
+        <file>icons/VNMACIP.ico</file>
+        <file>icons/BRVN.ico</file>
+        <file>icons/cloud.ico</file>
+        <file>icons/local.ico</file>
+        <file>icons/port.ico</file>
+    </qresource>
+</RCC>

@@ -101,7 +101,6 @@ void PersistantService::readStatus() {
                 key = pair.cap(1);value = pair.cap(2);
                 emit interfaceAttrFound(currentBridge, currentPort, currentInterface, key, value);
             }
-
         }
     }
 }
@@ -172,18 +171,56 @@ QJsonObject PersistantService::readJson(QString path) {
     return obj;
 }
 
-void PersistantService::setInterface(QString interfaceName, QString type, QStringList options) {
+void PersistantService::setInterface(QString interfaceName, QMap<QString, QString> attrMap) {
     QString query("gksudo");
     QStringList arguments;
     QString cmd = QString("ovs-vsctl set interface %1 ").arg(interfaceName);
-    if (type.length() > 1) cmd.append(QString(" type=%1 ").arg(type));
-    while (options.length() >= 2) {
-        cmd.append(QString(" options:%1=%2 ").arg(options[0]).arg(options[1]));
-        options.pop_front();
-        options.pop_front();
+    QMap<QString,QString>::iterator it = attrMap.begin();
+    while (it != attrMap.end()) {
+        cmd.append(" " + it.key() + "=" + it.value() + " ");
+        it++;
     }
     arguments <<cmd;
     connect(process, SIGNAL(finished(int)), this, SLOT(onNormalProcessEnd()));
     process->start(query, arguments);
     process->waitForFinished();
+}
+
+void PersistantService::listInterfaceAttr(QString interfaceName) {
+    currentInterface = interfaceName;
+    QString query("gksudo");
+    QStringList arguments;
+    arguments<<QString("ovs-vsctl list interface %1").arg(interfaceName);
+    connect(process, SIGNAL(readyRead()), this, SLOT(readInterfaceAttr()));
+    connect(process, SIGNAL(finished(int)), this, SLOT(onListInterfaceAttrEnd()));
+    process->start(query, arguments);
+    process->waitForFinished();
+}
+
+void PersistantService::readInterfaceAttr() {
+    QString stdout = process->readAllStandardOutput().trimmed();
+    QStringList brList = stdout.split("\n");
+    QRegExp exp("^(.+):(.+)$"), quot("\""), bracket("[{}]"), pair("([\\w_]+)=([\\w\\.-]+)");
+    for (int i=0;i<brList.length();i++) {
+        exp.indexIn(brList[i]);
+        QString key = exp.cap(1).trimmed(), value = exp.cap(2).trimmed();
+        if (key != "options") {
+            emit interfaceAttrFound("","",currentInterface,key,value);
+        } else {
+            value = value.replace(bracket, "");
+            value = value.replace(quot, "");
+            QString options = value;
+            QStringList optionList = options.split(',');
+            for (int i=0;i<optionList.length();i++) {
+                pair.indexIn(optionList[i].trimmed());
+                key = pair.cap(1);value = pair.cap(2);
+                emit interfaceAttrFound("", "", currentInterface, key, value);
+            }
+        }
+    }
+}
+
+void PersistantService::onListInterfaceAttrEnd() {
+    disconnect(process, SIGNAL(finished(int)), this, SLOT(onListInterfaceAttrEnd()));
+    disconnect(process,SIGNAL(readyRead()),this,SLOT(readInterfaceAttr()));
 }

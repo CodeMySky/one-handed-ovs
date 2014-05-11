@@ -13,11 +13,9 @@ QStringList Port::info() {
     QStringList sl;
     if (interfaceList.length() == 0) {
         sl<<"No interface";
-    } else {
-        sl<<"Interface List:";
     }
     for (int i=0;i<interfaceList.length();i++) {
-        sl<<interfaceList[i]->getName();
+        sl<<QString("接口类型:%1").arg(interfaceList[i]->getType());
     }
     return sl;
 }
@@ -40,4 +38,8 @@ Interface * Port::getInterface(int index) {
         return interfaceList[index];
     }
     return NULL;
+}
+
+QString Port::getKey() {
+    return interfaceList[0]->getKey();
 }

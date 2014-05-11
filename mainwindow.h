@@ -32,7 +32,7 @@ private slots:
     void clearAll();
     void echoBridge(QString bridgeName);
     void echoPort(int index, QString bridgeName);
-    void echoInterface(int brIndex, int portIndex, QString interfaceName);
+    //void echoInterface(int brIndex, int portIndex, QString interfaceName);
     void echoError(QString);
     void echoKey(int, QString);
     void treeClicked();
@@ -43,7 +43,8 @@ private slots:
     void on_action_VN_MAC_IP_triggered();
     void on_action_NVE_triggered();
     void on_action_add_br_triggered();
-    void deleteSth();
+    void on_action_exit_triggered();
+    void on_action_delete_triggered();
     void addPort();
     void setInterface();
 };

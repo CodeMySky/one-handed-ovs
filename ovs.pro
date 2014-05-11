@@ -34,3 +34,6 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     setportdialog.ui \
     nvo3dialog.ui
+
+RESOURCES += \
+    icons.qrc
